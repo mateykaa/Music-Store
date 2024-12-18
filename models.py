@@ -1,6 +1,12 @@
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy()
+app = Flask(__name__)
+
+# Укажите URL вашей базы данных (например, для PostgreSQL)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://username:password@localhost/mydatabase'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
 class Ensemble(db.Model):
     __tablename__ = 'ensembles'

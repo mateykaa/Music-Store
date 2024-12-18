@@ -3,15 +3,21 @@ from flask_migrate import Migrate
 from models import db, Ensemble, Musician, Album
 from datetime import datetime
 
+
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///music_store.db'
+
+    # Конфигурация подключения к PostgreSQL
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://username:new_password@db:5432/mydatabase'
+
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
     migrate = Migrate(app, db)
 
-    # Регистрация маршрутов
+    with app.app_context():
+        db.create_all()
+        # Регистрация маршрутов
     @app.route('/')
     def index():
         ensembles = Ensemble.query.all()
@@ -56,8 +62,17 @@ def create_app():
         db.session.commit()
         return redirect(url_for('index'))
 
+    @app.route('/check_db')
+    def check_db():
+        try:
+            db.session.execute('SELECT 1')
+            return "Database connection successful"
+        except Exception as e:
+            return f"Error: {str(e)}"
+
     return app
+
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
